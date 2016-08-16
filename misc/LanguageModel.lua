@@ -210,14 +210,18 @@ function layer:sample_beam(imgs, opt)
         local cols = math.min(beam_size,ys:size(2))
         local rows = beam_size
         if t == 3 then rows = 1 end -- at first time step only the first beam is active
-        for c=1,cols do -- for each column (word, essentially)
+	for c=1,cols do -- for each column (word, essentially)
           for q=1,rows do -- for each beam expansion
             -- compute logprob of expanding beam q with word in (sorted) position c
             local local_logprob = ys[{ q,c }]
             local candidate_logprob = beam_logprobs_sum[q] + local_logprob
-            table.insert(candidates, {c=ix[{ q,c }], q=q, p=candidate_logprob, r=local_logprob })
-          end
-        end
+	    icc = ix[{q,c}]
+	    if icc ~= self.vocab_size then
+	      table.insert(candidates, {c=icc, q=q, p=candidate_logprob, r=local_logprob })
+	    else table.insert(candidates, {c=ix[{q,cols+1}], q=q, p=candidate_logprob, r=local_logprob })
+	    end
+           end
+	end
         table.sort(candidates, compare) -- find the best c,q pairs
 
         -- construct new beams
