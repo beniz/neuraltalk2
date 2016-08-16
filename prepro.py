@@ -40,9 +40,13 @@ def prepro_captions(imgs):
   for i,img in enumerate(imgs):
     img['processed_tokens'] = []
     for j,s in enumerate(img['captions']):
-      txt = str(s).lower().translate(None, string.punctuation).strip().split()
+      #print str(s).lower()
+      #txt = str(s).lower().translate(None, string.punctuation).strip().split()
+      txt = s.encode('ascii', errors='backslashreplace').lower().translate(None, string.punctuation).strip().split()
       img['processed_tokens'].append(txt)
       if i < 10 and j == 0: print txt
+      if not txt:
+        print 'empty caption=',s
 
 def build_vocab(imgs, params):
   count_thr = params['word_count_threshold']
@@ -182,12 +186,14 @@ def main(params):
   dset = f.create_dataset("images", (N,3,256,256), dtype='uint8') # space for resized images
   for i,img in enumerate(imgs):
     # load the image
+    #print img['file_path']
     I = imread(os.path.join(params['images_root'], img['file_path']))
     try:
         Ir = imresize(I, (256,256))
     except:
-        print 'failed resizing image %s - see http://git.io/vBIE0' % (img['file_path'],)
-        raise
+        #print 'failed resizing image %s - see http://git.io/vBIE0' % (img['file_path'],)
+        #raise
+        continue
     # handle grayscale input images
     if len(Ir.shape) == 2:
       Ir = Ir[:,:,np.newaxis]
