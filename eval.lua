@@ -28,6 +28,7 @@ cmd:option('-language_eval', 0, 'Evaluate language as well (1 = yes, 0 = no)? BL
 cmd:option('-dump_images', 1, 'Dump images into vis/imgs folder for vis? (1=yes,0=no)')
 cmd:option('-dump_json', 1, 'Dump json with predictions into vis folder? (1=yes,0=no)')
 cmd:option('-dump_path', 0, 'Write image paths along with predictions into vis json? (1=yes,0=no)')
+cmd:option('-images_id_path',0,'Whether to use the path as id in JSON (1=yes, 0=no)')
 -- Sampling options
 cmd:option('-sample_max', 1, '1 = sample argmax words. 0 = sample from distributions.')
 cmd:option('-beam_size', 2, 'used when sample_max = 1, indicates number of beams in beam search. Usually 2 or 3 works well. More is not better. Set this to 1 for faster runtime but a bit worse performance.')
@@ -135,7 +136,12 @@ local function eval_split(split, evalopt)
     local seq = protos.lm:sample(feats, sample_opts)
     local sents = net_utils.decode_sequence(vocab, seq)
     for k=1,#sents do
-      local entry = {image_id = data.infos[k].id, caption = sents[k]}
+      local entry = {}
+      if opt.images_id_path == 0 then
+        entry = {image_id = data.infos[k].id, caption = sents[k]}
+      else
+        entry = {image_id = data.infos[k].file_path, caption = sents[k]}
+      end
       if opt.dump_path == 1 then
         entry.file_name = data.infos[k].file_path
       end

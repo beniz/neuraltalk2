@@ -173,6 +173,7 @@ function net_utils.decode_sequence(ix_to_word, seq)
     for j=1,D do
       local ix = seq[{j,i}]
       local word = ix_to_word[tostring(ix)]
+      -- if not word or word == 'UNK' then break end -- END token, likely. Or null token
       if not word then break end -- END token, likely. Or null token
       if j >= 2 then txt = txt .. ' ' end
       txt = txt .. word
